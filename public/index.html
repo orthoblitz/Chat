@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secure Group Chat</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Entry Screen -->
+  <div id="entry-screen">
+    <h2>Enter Your Name to Join</h2>
+    <input id="nameInput" type="text" placeholder="Your name" />
+    <button onclick="enterChat()">Join Chat</button>
+  </div>
+
+  <!-- Chat Screen -->
+  <div id="chat-screen" style="display: none;">
+    <div class="top-bar">
+      <span id="greeting">Welcome!</span>
+    </div>
+
+    <div class="chat-container">
+      <!-- Sidebar: Online Users -->
+      <aside class="sidebar">
+        <h3>Online Users</h3>
+        <ul id="user-list"></ul>
+      </aside>
+
+      <!-- Chat Box -->
+      <main class="chat-box-wrapper">
+        <div id="chat-box" class="chat-box"></div>
+
+        <!-- Input -->
+        <div class="input-area">
+          <input id="msgInput" type="text" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()" />
+          <button onclick="sendMessage()">Send</button>
+          <button onclick="clearChat()" title="Clear your chat view only">🗑️</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
