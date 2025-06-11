@@ -25,11 +25,16 @@ try {
   console.error('Failed to load message history:', err);
 }
 
+// Track cleared users (temporary memory)
+let clearedChatUsers = {};
+
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  // Send existing messages
-  socket.emit('chat history', messageHistory);
+  // Only send history if not cleared
+  if (!clearedChatUsers[socket.id]) {
+    socket.emit('chat history', messageHistory);
+  }
 
   socket.on('join', (username) => {
     users[socket.id] = username;
@@ -41,6 +46,7 @@ io.on('connection', (socket) => {
     if (users[socket.id]) {
       const username = users[socket.id];
       delete users[socket.id];
+      delete clearedChatUsers[socket.id]; // clean up
       io.emit('system message', `${username} left the chat`);
       io.emit('user list', Object.values(users));
     }
@@ -60,6 +66,10 @@ io.on('connection', (socket) => {
 
   socket.on('typing', ({ user, typing }) => {
     socket.broadcast.emit('typing', { user, typing });
+  });
+
+  socket.on('clear chat', () => {
+    clearedChatUsers[socket.id] = true;
   });
 });
 
