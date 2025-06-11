@@ -17,11 +17,24 @@ function enterChat() {
   const name = nameInput.value.trim();
   if (!name) return;
   userName = name;
+  localStorage.setItem("savedName", userName);
   entryScreen.style.display = "none";
   chatScreen.style.display = "block";
   greeting.innerText = `Welcome, ${userName}!`;
   socket.emit("join", userName);
 }
+
+// Auto-login if saved
+window.addEventListener("load", () => {
+  const saved = localStorage.getItem("savedName");
+  if (saved) {
+    userName = saved;
+    entryScreen.style.display = "none";
+    chatScreen.style.display = "block";
+    greeting.innerText = `Welcome, ${userName}!`;
+    socket.emit("join", userName);
+  }
+});
 
 // Sending messages
 function sendMessage() {
@@ -77,10 +90,11 @@ function removeTyping(user) {
   if (el) el.remove();
 }
 
-// Clear chat (for this user only)
+// Clear chat (and persist this choice)
 function clearChat() {
   if (confirm("Clear your chat view? This won’t delete it for others.")) {
     chatBox.innerHTML = "";
+    localStorage.setItem("chatCleared", "true");
   }
 }
 
@@ -88,17 +102,20 @@ function clearChat() {
 
 // Receive past chat messages
 socket.on("chat history", (messages) => {
-  messages.forEach(({ user, message }) => {
-    addMessage(`${user}: ${message}`);
-  });
+  const chatCleared = localStorage.getItem("chatCleared") === "true";
+  if (!chatCleared) {
+    messages.forEach(({ user, message }) => {
+      addMessage(`${user}: ${message}`);
+    });
+  }
 });
 
-// When someone sends a message
+// New chat message
 socket.on("chat message", ({ user, message }) => {
   addMessage(`${user}: ${message}`);
 });
 
-// System messages (join/leave)
+// System message
 socket.on("system message", (msg) => {
   addMessage(msg, "system");
 });
@@ -108,7 +125,7 @@ socket.on("user list", (users) => {
   userList.innerHTML = users.map(user => `<li>${user}</li>`).join("");
 });
 
-// Typing indicator
+// Typing
 socket.on("typing", ({ user, typing }) => {
   if (typing) {
     addTyping(user);
