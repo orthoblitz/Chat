@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
 
   socket.on('join', (username) => {
     users[socket.id] = username;
-    io.emit('system message', `${username} joined the chat`);
+    io.emit('system message', ${username} joined the chat);
     io.emit('user list', Object.values(users));
   });
 
@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
       const username = users[socket.id];
       delete users[socket.id];
       delete clearedChatUsers[socket.id]; // clean up
-      io.emit('system message', `${username} left the chat`);
+      io.emit('system message', ${username} left the chat);
       io.emit('user list', Object.values(users));
     }
   });
@@ -57,16 +57,9 @@ io.on('connection', (socket) => {
     const newMsg = { user, message };
     messageHistory.push(newMsg);
 
-    try {
-      // Ensure file exists before writing
-      if (!fs.existsSync(messageFile)) {
-        fs.writeFileSync(messageFile, '[]');
-      }
-      // Save instantly
-      fs.writeFileSync(messageFile, JSON.stringify(messageHistory, null, 2));
-    } catch (err) {
-      console.error('Error saving message:', err);
-    }
+    fs.writeFile(messageFile, JSON.stringify(messageHistory, null, 2), (err) => {
+      if (err) console.error('Error saving message:', err);
+    });
 
     io.emit('chat message', newMsg);
   });
