@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
 
   socket.on('join', (username) => {
     users[socket.id] = username;
-    io.emit('system message', ${username} joined the chat);
+    io.emit('system message', `${username} joined the chat`);
     io.emit('user list', Object.values(users));
   });
 
@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
       const username = users[socket.id];
       delete users[socket.id];
       delete clearedChatUsers[socket.id]; // clean up
-      io.emit('system message', ${username} left the chat);
+      io.emit('system message', `${username} left the chat`);
       io.emit('user list', Object.values(users));
     }
   });
