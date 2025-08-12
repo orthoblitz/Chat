@@ -57,9 +57,16 @@ io.on('connection', (socket) => {
     const newMsg = { user, message };
     messageHistory.push(newMsg);
 
-    fs.writeFile(messageFile, JSON.stringify(messageHistory, null, 2), (err) => {
-      if (err) console.error('Error saving message:', err);
-    });
+    try {
+      // Ensure file exists before writing
+      if (!fs.existsSync(messageFile)) {
+        fs.writeFileSync(messageFile, '[]');
+      }
+      // Save instantly
+      fs.writeFileSync(messageFile, JSON.stringify(messageHistory, null, 2));
+    } catch (err) {
+      console.error('Error saving message:', err);
+    }
 
     io.emit('chat message', newMsg);
   });
